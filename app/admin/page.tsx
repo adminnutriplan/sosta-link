@@ -18,10 +18,11 @@ const fmt = (iso: string) =>
 
 export default async function AdminPage({ searchParams }: { searchParams: { error?: string } }) {
   const supabase = createClient();
-  const { data } = await supabase
+  const { data, error: loadError } = await supabase
     .from("links")
     .select("id, slug, url, clicks, last_clicked_at, created_at")
     .order("created_at", { ascending: false });
+  if (loadError) console.error("load links error:", loadError);
   const links = (data ?? []) as LinkRow[];
   const base = (process.env.NEXT_PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -39,6 +40,11 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
       </header>
 
       {searchParams.error && <div className="err">{searchParams.error}</div>}
+      {loadError && (
+        <div className="err">
+          Gagal memuat daftar link ({loadError.code}: {loadError.message}).
+        </div>
+      )}
 
       <form action={createLink} className="card">
         <div className="row">

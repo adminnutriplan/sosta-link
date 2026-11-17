@@ -50,7 +50,8 @@ export async function createLink(formData: FormData) {
   const { error } = await supabase.from("links").insert({ slug, url, created_by: user.id });
   if (error) {
     if (error.code === "23505") fail(`Slug "${slug}" sudah dipakai.`);
-    fail("Gagal menyimpan link.");
+    console.error("createLink error:", error);
+    fail(`Gagal menyimpan link (${error.code}: ${error.message}).`);
   }
   revalidatePath("/admin");
   redirect("/admin");
@@ -61,7 +62,10 @@ export async function updateLink(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const url = normalizeUrl(String(formData.get("url") ?? ""));
   const { error } = await supabase.from("links").update({ url }).eq("id", id);
-  if (error) fail("Gagal memperbarui link.");
+  if (error) {
+    console.error("updateLink error:", error);
+    fail(`Gagal memperbarui link (${error.code}: ${error.message}).`);
+  }
   revalidatePath("/admin");
   redirect("/admin");
 }
@@ -70,7 +74,10 @@ export async function deleteLink(formData: FormData) {
   const supabase = createClient();
   const id = String(formData.get("id") ?? "");
   const { error } = await supabase.from("links").delete().eq("id", id);
-  if (error) fail("Gagal menghapus link.");
+  if (error) {
+    console.error("deleteLink error:", error);
+    fail(`Gagal menghapus link (${error.code}: ${error.message}).`);
+  }
   revalidatePath("/admin");
   redirect("/admin");
 }
