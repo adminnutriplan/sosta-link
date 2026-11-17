@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseEnv } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, { params }: { params: { slug: string } }) {
+  const { url: sbUrl, key: sbKey } = supabaseEnv();
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    sbUrl,
+    sbKey,
     { auth: { persistSession: false } }
   );
 
