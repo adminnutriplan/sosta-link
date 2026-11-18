@@ -23,7 +23,10 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
   const { data: url } = await supabase.rpc("hit_link", { p_slug: params.slug });
 
   if (!url || typeof url !== "string") {
-    return new NextResponse("Link tidak ditemukan.", { status: 404 });
+    return new NextResponse("Link tidak ditemukan.", {
+      status: 404,
+      headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+    });
   }
 
   // 302 (bukan 301) agar perubahan URL tujuan langsung berlaku dan tidak di-cache browser
