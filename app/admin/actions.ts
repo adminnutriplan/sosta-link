@@ -49,7 +49,7 @@ export async function createLink(formData: FormData) {
 
   const { error } = await supabase.from("links").insert({ slug, url, created_by: user.id });
   if (error) {
-    if (error.code === "23505") fail(`Slug "${slug}" sudah dipakai (huruf besar/kecil dianggap sama).`);
+    if (error.code === "23505") fail(`Slug "${slug}" sudah dipakai.`);
     console.error("createLink error:", error);
     fail(`Gagal menyimpan link (${error.code}: ${error.message}).`);
   }

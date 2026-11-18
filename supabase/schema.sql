@@ -10,9 +10,6 @@ create table if not exists public.links (
   created_at timestamptz not null default now()
 );
 
--- Slug tidak membedakan huruf besar/kecil: /Cuti dan /cuti adalah link yang sama
-create unique index if not exists links_slug_lower_key on public.links (lower(slug));
-
 alter table public.links enable row level security;
 
 -- Hak akses tabel untuk role login (RLS di bawah tetap membatasi baris)
@@ -36,7 +33,7 @@ declare
 begin
   update public.links
      set clicks = clicks + 1, last_clicked_at = now()
-   where lower(slug) = lower(p_slug)
+   where slug = p_slug
    returning url into u;
   return u;
 end;
