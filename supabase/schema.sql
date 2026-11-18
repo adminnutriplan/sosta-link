@@ -12,6 +12,9 @@ create table if not exists public.links (
 
 alter table public.links enable row level security;
 
+-- Hak akses tabel untuk role login (RLS di bawah tetap membatasi baris)
+grant select, insert, update, delete on public.links to authenticated;
+
 -- Hanya user yang login (tim) yang boleh melihat & mengubah tabel
 create policy "tim bisa baca" on public.links for select to authenticated using (true);
 create policy "tim bisa tambah" on public.links for insert to authenticated with check (true);

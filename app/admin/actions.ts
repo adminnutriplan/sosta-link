@@ -50,7 +50,8 @@ export async function createLink(formData: FormData) {
   const { error } = await supabase.from("links").insert({ slug, url, created_by: user.id });
   if (error) {
     if (error.code === "23505") fail(`Slug "${slug}" sudah dipakai.`);
-    fail("Gagal menyimpan link.");
+    console.error("createLink error:", error);
+    fail(`Gagal menyimpan link (${error.code}: ${error.message}).`);
   }
   revalidatePath("/admin");
   redirect("/admin");
@@ -60,8 +61,12 @@ export async function updateLink(formData: FormData) {
   const supabase = createClient();
   const id = String(formData.get("id") ?? "");
   const url = normalizeUrl(String(formData.get("url") ?? ""));
-  const { error } = await supabase.from("links").update({ url }).eq("id", id);
-  if (error) fail("Gagal memperbarui link.");
+  const { data, error } = await supabase.from("links").update({ url }).eq("id", id).select("id");
+  if (!error && (!data || data.length === 0)) fail("Link tidak ditemukan atau tidak bisa diubah.");
+  if (error) {
+    console.error("updateLink error:", error);
+    fail(`Gagal memperbarui link (${error.code}: ${error.message}).`);
+  }
   revalidatePath("/admin");
   redirect("/admin");
 }
@@ -69,8 +74,13 @@ export async function updateLink(formData: FormData) {
 export async function deleteLink(formData: FormData) {
   const supabase = createClient();
   const id = String(formData.get("id") ?? "");
-  const { error } = await supabase.from("links").delete().eq("id", id);
-  if (error) fail("Gagal menghapus link.");
+  // .select() agar ketahuan jika RLS/izin membuat 0 baris terhapus (Supabase tidak menganggapnya error)
+  const { data, error } = await supabase.from("links").delete().eq("id", id).select("id");
+  if (!error && (!data || data.length === 0)) fail("Link tidak terhapus (tidak ditemukan atau tidak ada izin).");
+  if (error) {
+    console.error("deleteLink error:", error);
+    fail(`Gagal menghapus link (${error.code}: ${error.message}).`);
+  }
   revalidatePath("/admin");
   redirect("/admin");
 }

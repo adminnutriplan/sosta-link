@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { supabaseEnv } from "./env";
+import { noStoreFetch } from "./no-store-fetch";
 
 export function createClient() {
   const { url, key } = supabaseEnv();
@@ -9,6 +10,7 @@ export function createClient() {
     url,
     key,
     {
+      global: { fetch: noStoreFetch },
       cookies: {
         getAll() {
           return store.getAll();
